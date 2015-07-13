@@ -75,7 +75,7 @@
     <orderEntry type="library" exported="" name="Gradle: org.apache.axis:axis-saaj:1.4" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.slf4j:slf4j-api:1.7.7" level="project" />
     <orderEntry type="module-library" exported="">
-      <library name="Gradle: _Project_ECommerce_Java_ECommerce_WS_libs_dot_net_webservice_stub_jar">
+      <library name="Gradle: _Project_ECommerce_Java_NPM_ECommerce_WS_libs_dot_net_webservice_stub_jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/dot_net_webservice_stub.jar!/" />
         </CLASSES>
@@ -84,7 +84,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="Gradle: _Project_ECommerce_Java_ECommerce_WS_libs_orderservice_stub_jar">
+      <library name="Gradle: _Project_ECommerce_Java_NPM_ECommerce_WS_libs_orderservice_stub_jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/orderservice_stub.jar!/" />
         </CLASSES>

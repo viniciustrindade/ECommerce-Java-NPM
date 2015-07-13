@@ -16,38 +16,30 @@
 
 package com.appdynamicspilot.action;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.appdynamicspilot.jms.FulfillmentProducer;
-import com.appdynamicspilot.model.FulfillmentOrder;
-import com.opensymphony.xwork2.Action;
-import org.apache.log4j.Logger;
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.ServletResponseAware;
-
 import com.appdynamics.xml.CastorUtil;
-import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.Preparable;
-
 import com.appdynamicspilot.exception.OrderException;
-import com.appdynamicspilot.jms.CustomerMessageProducer;
-import com.appdynamicspilot.jms.MessageProducer;
 import com.appdynamicspilot.model.Cart;
+import com.appdynamicspilot.model.FulfillmentOrder;
 import com.appdynamicspilot.model.Item;
 import com.appdynamicspilot.model.User;
-import com.appdynamicspilot.webserviceclient.*;
 import com.appdynamicspilot.service.CartService;
 import com.appdynamicspilot.service.ItemService;
 import com.appdynamicspilot.util.ArgumentUtils;
+import com.appdynamicspilot.webserviceclient.DotNetClient;
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Preparable;
+import org.apache.log4j.Logger;
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
+import org.tempuri.ArrayOfOrderDetail;
+import org.tempuri.OrderDetail;
 
-import org.tempuri.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CartAction extends ActionSupport implements Preparable,
         ServletResponseAware, ServletRequestAware {
@@ -58,9 +50,10 @@ public class CartAction extends ActionSupport implements Preparable,
     private ItemService itemService;
     private String selectedItemId;
     private String xml;
-    private MessageProducer messageProducer;
+    //Removing jms code for NPM team
+    /*private MessageProducer messageProducer;
     private FulfillmentProducer fulfillmentProducer;
-    private CustomerMessageProducer customerMessageProducer;
+    private CustomerMessageProducer customerMessageProducer;*/
     private HttpServletRequest request;
     private HttpServletResponse response;
 
@@ -279,7 +272,8 @@ public class CartAction extends ActionSupport implements Preparable,
                     outOfStock = 1;
                 }
                 FulfillmentOrder order = new FulfillmentOrder(item, user);
-                fulfillmentProducer.sendFulfillment(order);
+                //Removing jms code for NPM team
+                /*fulfillmentProducer.sendFulfillment(order);*/
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -299,9 +293,10 @@ public class CartAction extends ActionSupport implements Preparable,
             orderIds = orderIds.substring(0, orderIds.length() - 2);
             log.debug("Request time(ms) in CartAction: sendItems"
                     + System.currentTimeMillis());
-            messageProducer.sendMessageWithOrderId(orderIds, user.getEmail());
+            //Removing jms code for NPM team
+            /*messageProducer.sendMessageWithOrderId(orderIds, user.getEmail());
             messageProducer.sendTextMessageWithOrderId();
-            customerMessageProducer.sendCustomerMesssage(user);
+            customerMessageProducer.sendCustomerMesssage(user);*/
 
 
             if (invoiceId == "")
@@ -346,9 +341,7 @@ public class CartAction extends ActionSupport implements Preparable,
         return this.cartService;
     }
 
-    public MessageProducer getMessageProducer() {
-        return this.messageProducer;
-    }
+
 
     public String getSelectedItemId() {
         return selectedItemId;
@@ -362,12 +355,16 @@ public class CartAction extends ActionSupport implements Preparable,
         this.itemService = itemService;
     }
 
-    /**
-     * @param messageProducer The messageProducer to set.
-     */
+
+    //Removing jms code for NPM team
+
+    /*public MessageProducer getMessageProducer() {
+        return this.messageProducer;
+    }
+
     public void setMessageProducer(MessageProducer messageProducer) {
         this.messageProducer = messageProducer;
-    }
+    }*/
 
     public void setServletRequest(HttpServletRequest request) {
         this.request = request;
@@ -403,7 +400,8 @@ public class CartAction extends ActionSupport implements Preparable,
         }
     }
 
-    public CustomerMessageProducer getCustomerMessageProducer() {
+    //Removing jms code for NPM team
+    /*public CustomerMessageProducer getCustomerMessageProducer() {
         return customerMessageProducer;
     }
 
@@ -417,7 +415,7 @@ public class CartAction extends ActionSupport implements Preparable,
 
     public void setFulfillmentProducer(FulfillmentProducer fulfillmentProducer) {
         this.fulfillmentProducer = fulfillmentProducer;
-    }
+    }*/
 
     //Removing all the items from the cart, either if the user logs out of the session or if the user completes the transaction
     public String removeAllItems() {

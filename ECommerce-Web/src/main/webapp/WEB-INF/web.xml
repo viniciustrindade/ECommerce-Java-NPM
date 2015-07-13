@@ -27,8 +27,7 @@
                 com.appdynamicspilot.rest.UserLogin,
                 com.appdynamicspilot.rest.Fulfillment,
                 com.appdynamicspilot.restv2.Carts,
-                com.appdynamicspilot.restv2.Items,
-                com.appdynamicspilot.restv2.Faults
+                com.appdynamicspilot.restv2.Items
             </param-value>
         </init-param>
     </servlet>
@@ -74,7 +73,7 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/applicationContext.xml /WEB-INF/applicationContext-jms.xml</param-value>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
     </context-param>
 
     <listener>

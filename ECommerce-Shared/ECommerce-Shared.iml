@@ -16,15 +16,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
-      <library name="Gradle: orderservice_stub">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/orderservice_stub.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" exported="" name="Gradle: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" exported="" name="Gradle: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="library" exported="" name="Gradle: javax.jms:jms-api:1.1-rev-1" level="project" />
@@ -77,6 +68,7 @@
     <orderEntry type="library" exported="" name="Gradle: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.apache.httpcomponents:httpclient:4.3.4" level="project" />
     <orderEntry type="library" exported="" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.3.2" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: joda-time:joda-time:2.8.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: stax:stax-api:1.0.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.apache.axis:axis-saaj:1.4" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.apache.httpcomponents:httpcore:4.3.2" level="project" />
@@ -84,9 +76,17 @@
     <orderEntry type="library" exported="" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.3.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.3.2" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.slf4j:slf4j-api:1.7.7" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: joda-time:joda-time:2.8.1" level="project" />
     <orderEntry type="module-library" exported="">
-      <library name="Gradle: _Project_ECommerce_Java_ECommerce_Shared_libs_dot_net__webservice_stub_jar">
+      <library name="Gradle: orderservice_stub">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/orderservice_stub.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library name="Gradle: _Project_ECommerce_Java_NPM_ECommerce_Shared_libs_dot_net__webservice_stub_jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/dot_net _webservice_stub.jar!/" />
         </CLASSES>
@@ -95,7 +95,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="Gradle: _Project_ECommerce_Java_ECommerce_Shared_libs_ojdbc6_jar">
+      <library name="Gradle: _Project_ECommerce_Java_NPM_ECommerce_Shared_libs_ojdbc6_jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/ojdbc6.jar!/" />
         </CLASSES>

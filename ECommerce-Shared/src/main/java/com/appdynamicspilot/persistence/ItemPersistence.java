@@ -16,18 +16,12 @@
 
 package com.appdynamicspilot.persistence;
 
-import java.lang.Math;
-import java.util.List;
-
+import com.appdynamicspilot.model.Item;
+import com.appdynamicspilot.util.ArgumentUtils;
 import org.apache.log4j.Logger;
 
-
-import com.appdynamicspilot.model.Item;
-import com.appdynamicspilot.oracle.jdbc.OracleQueryExecutor;
-import com.appdynamicspilot.util.ArgumentUtils;
-import com.appdynamicspilot.util.SpringContext;
-
-import javax.persistence.*;
+import javax.persistence.Query;
+import java.util.List;
 
 public class ItemPersistence extends BasePersistenceImpl {
     /**

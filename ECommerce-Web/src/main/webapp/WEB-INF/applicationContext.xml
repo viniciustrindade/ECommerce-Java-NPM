@@ -20,43 +20,30 @@
                 <value>/WEB-INF/database.properties</value>
                 <value>/WEB-INF/mail.properties</value>
                 <value>/WEB-INF/configuration.properties</value>
-             </list>
+            </list>
         </property>
     </bean>
 
-    <bean id="defaultDestination" class="org.apache.activemq.command.ActiveMQQueue">
-        <constructor-arg value="OrderQueue" />
-    </bean>
 
-    <bean id="customerDestination" class="org.apache.activemq.command.ActiveMQQueue">
-        <constructor-arg value="CustomerQueue" />
-    </bean>
-
-    <bean id="fulfillmentDestination" class="org.apache.activemq.command.ActiveMQQueue">
-        <constructor-arg value="fulfillmentQueue" />
-    </bean>
 
     <bean id="springContext" class="com.appdynamicspilot.util.SpringContext" />
 
-    <bean id="oraDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="java:comp/env/jdbc/OracleECommerceDB"/>
-    </bean>
 
 
-   <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="java:comp/env/jdbc/ECommerceDB"/>
     </bean>
 
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-       <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="dataSource"/>
         <property name="persistenceUnitName" value="pu"/>
         <property name="jpaVendorAdapter">
             <bean  class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
 
-                    <property name="showSql" value="true"/>
-                    <property name="generateDdl" value="false"/>
-                    <property name="database" value="MYSQL"/>
+                <property name="showSql" value="true"/>
+                <property name="generateDdl" value="false"/>
+                <property name="database" value="MYSQL"/>
 
 
             </bean>
@@ -65,10 +52,10 @@
 
 
 
-   <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
-       <property name="dataSource" ref="dataSource" />
-   </bean>
+        <property name="dataSource" ref="dataSource" />
+    </bean>
 
     <bean id="entityManagerHolder" class="com.appdynamicspilot.persistence.EntityManagerHolder">
         <property name="entityManagerFactory">
@@ -82,43 +69,40 @@
         </property>
     </bean>
 
-   <bean id="oracleQueryExecutor" class="com.appdynamicspilot.oracle.jdbc.OracleStatementExecutor">
-       <property name="oracleQueryString" value="${oracle.queryString}"></property>
-       <property name="dataSource" ref="oraDataSource"/>
-   </bean>
+
 
     <bean id="mailerServiceTarget" class="com.appdynamicspilot.service.MailSender">
-       <property name="user" value="${mail.username}" />
-       <property name="password" value="${mail.password}" />
-       <property name="fromAddress" value="${mail.default.from}" />
-       <property name="host" value="${mail.host}" />
-       <property name="port" value="${mail.port}" />
-   </bean>
+        <property name="user" value="${mail.username}" />
+        <property name="password" value="${mail.password}" />
+        <property name="fromAddress" value="${mail.default.from}" />
+        <property name="host" value="${mail.host}" />
+        <property name="port" value="${mail.port}" />
+    </bean>
 
-   <bean id="mailerService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-      <property name="transactionManager"><ref bean="transactionManager"/></property>
-      <property name="target"><ref local="mailerServiceTarget"/></property>
-      <property name="proxyTargetClass"><value>true</value></property>
-      <property name="transactionAttributes">
-           <props>
-              <prop key="get*">PROPAGATION_SUPPORTS</prop>
-              <prop key="save*">PROPAGATION_REQUIRED</prop>
-              <prop key="update*">PROPAGATION_REQUIRED</prop>
-              <prop key="delete*">PROPAGATION_REQUIRED</prop>
-               <prop key="*">PROPAGATION_REQUIRED</prop>
-           </props>
-      </property>
-   </bean>
+    <bean id="mailerService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager"><ref bean="transactionManager"/></property>
+        <property name="target"><ref local="mailerServiceTarget"/></property>
+        <property name="proxyTargetClass"><value>true</value></property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="get*">PROPAGATION_SUPPORTS</prop>
+                <prop key="save*">PROPAGATION_REQUIRED</prop>
+                <prop key="update*">PROPAGATION_REQUIRED</prop>
+                <prop key="delete*">PROPAGATION_REQUIRED</prop>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
 
-   <bean id="userPersistence"
-         class="com.appdynamicspilot.persistence.UserPersistence" parent="dbProvider">
-       <property name="entityManagerFactory" ref="entityManagerFactory"/>
-   </bean>
+    <bean id="userPersistence"
+          class="com.appdynamicspilot.persistence.UserPersistence" parent="dbProvider">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
 
-   <bean id="itemPersistence"
-         class="com.appdynamicspilot.persistence.ItemPersistence" parent="dbProvider">
-       <property name="entityManagerFactory" ref="entityManagerFactory"/>
-       <!-- percentage to hit the slow oracle database query -->
+    <bean id="itemPersistence"
+          class="com.appdynamicspilot.persistence.ItemPersistence" parent="dbProvider">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+        <!-- percentage to hit the slow oracle database query -->
         <property name="interval"><value type="java.lang.Integer">15</value></property>
     </bean>
 
@@ -127,152 +111,97 @@
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
-    <bean id="faultPersistence"
-          class="com.appdynamicspilot.persistence.FaultPersistence" parent="dbProvider">
-        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    <bean id="userServiceTarget"
+          class="com.appdynamicspilot.service.UserService">
+        <property name="userPersistence" ref="userPersistence"/>
     </bean>
-		
-	<bean id="userServiceTarget"
-		class="com.appdynamicspilot.service.UserService">
-		<property name="userPersistence" ref="userPersistence"/>
-	</bean>
-	           
+
     <bean id="userService"
-        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-       <property name="transactionManager"><ref bean="transactionManager"/></property>
-       <property name="target"><ref local="userServiceTarget"/></property>
-       <property name="proxyTargetClass"><value>true</value></property>
-       <property name="transactionAttributes">
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager"><ref bean="transactionManager"/></property>
+        <property name="target"><ref local="userServiceTarget"/></property>
+        <property name="proxyTargetClass"><value>true</value></property>
+        <property name="transactionAttributes">
             <props>
-               <prop key="get*">PROPAGATION_SUPPORTS</prop>
-               <prop key="save*">PROPAGATION_REQUIRED</prop>
-               <prop key="update*">PROPAGATION_REQUIRED</prop>
-               <prop key="delete*">PROPAGATION_REQUIRED</prop>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
+                <prop key="get*">PROPAGATION_SUPPORTS</prop>
+                <prop key="save*">PROPAGATION_REQUIRED</prop>
+                <prop key="update*">PROPAGATION_REQUIRED</prop>
+                <prop key="delete*">PROPAGATION_REQUIRED</prop>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
             </props>
-       </property>
+        </property>
     </bean>
-    
+
     <bean id="itemServiceTarget"
-		class="com.appdynamicspilot.service.ItemService">
-		<property name="itemPersistence" ref="itemPersistence"/>
-	</bean>
-	           
-    <bean id="itemService"
-        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-       <property name="transactionManager"><ref bean="transactionManager"/></property>
-       <property name="target"><ref local="itemServiceTarget"/></property>
-       <property name="proxyTargetClass"><value>true</value></property>
-       <property name="transactionAttributes">
-            <props>
-               <prop key="get*">PROPAGATION_SUPPORTS</prop>
-               <prop key="save*">PROPAGATION_REQUIRED</prop>
-               <prop key="update*">PROPAGATION_REQUIRED</prop>
-               <prop key="delete*">PROPAGATION_REQUIRED</prop>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
-            </props>
-       </property>
+          class="com.appdynamicspilot.service.ItemService">
+        <property name="itemPersistence" ref="itemPersistence"/>
     </bean>
-    
+
+    <bean id="itemService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager"><ref bean="transactionManager"/></property>
+        <property name="target"><ref local="itemServiceTarget"/></property>
+        <property name="proxyTargetClass"><value>true</value></property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="get*">PROPAGATION_SUPPORTS</prop>
+                <prop key="save*">PROPAGATION_REQUIRED</prop>
+                <prop key="update*">PROPAGATION_REQUIRED</prop>
+                <prop key="delete*">PROPAGATION_REQUIRED</prop>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+
     <bean id="cartServiceTarget"
-		class="com.appdynamicspilot.service.CartService">
-		<property name="cartPersistence" ref="cartPersistence"/>
-		<property name="soapUtil" ref="soapUtil"/>
-		<property name="itemPersistence" ref="itemPersistence"/>
-	</bean>
+          class="com.appdynamicspilot.service.CartService">
+        <property name="cartPersistence" ref="cartPersistence"/>
+        <property name="soapUtil" ref="soapUtil"/>
+        <property name="itemPersistence" ref="itemPersistence"/>
+    </bean>
 
     <bean id="cartService"
           class="com.appdynamicspilot.service.CartService">
-    <property name="itemPersistence" ref="itemPersistence"/>
-    <property name="soapUtil" ref="soapUtil"/>
-    <property name="cartPersistence" ref="cartPersistence"/>
-    </bean>
-
-    <bean id="faultService"
-          class="com.appdynamicspilot.service.FaultService">
-        <property name="faultPersistence" ref="faultPersistence"/>
+        <property name="itemPersistence" ref="itemPersistence"/>
+        <property name="soapUtil" ref="soapUtil"/>
+        <property name="cartPersistence" ref="cartPersistence"/>
     </bean>
 
     <!--<bean id="cartService"-->
-        <!--class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">-->
-       <!--<property name="transactionManager"><ref bean="transactionManager"/></property>-->
-       <!--<property name="target"><ref local="cartServiceTarget"/></property>-->
-       <!--<property name="proxyTargetClass"><value>true</value></property>-->
-       <!--<property name="transactionAttributes">-->
-            <!--<props>-->
-               <!--<prop key="get*">PROPAGATION_SUPPORTS</prop>-->
-               <!--<prop key="save*">PROPAGATION_REQUIRED</prop>-->
-               <!--<prop key="update*">PROPAGATION_REQUIRED</prop>-->
-               <!--<prop key="delete*">PROPAGATION_REQUIRED</prop>-->
-				<!--<prop key="*">PROPAGATION_REQUIRED</prop>-->
-            <!--</props>-->
-       <!--</property>-->
+    <!--class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">-->
+    <!--<property name="transactionManager"><ref bean="transactionManager"/></property>-->
+    <!--<property name="target"><ref local="cartServiceTarget"/></property>-->
+    <!--<property name="proxyTargetClass"><value>true</value></property>-->
+    <!--<property name="transactionAttributes">-->
+    <!--<props>-->
+    <!--<prop key="get*">PROPAGATION_SUPPORTS</prop>-->
+    <!--<prop key="save*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="update*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="delete*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="*">PROPAGATION_REQUIRED</prop>-->
+    <!--</props>-->
+    <!--</property>-->
     <!--</bean>-->
-    
-     <bean id="mailService" class="com.appdynamicspilot.service.MailService">
-     	<property name="mailerService" ref="mailerService"/>
-     </bean>
-	           
-	 <bean id="soapUtil" class="com.appdynamicspilot.webserviceclient.SoapUtils">
-     	<property name="axisUrl">
+
+    <bean id="mailService" class="com.appdynamicspilot.service.MailService">
+        <property name="mailerService" ref="mailerService"/>
+    </bean>
+
+    <bean id="soapUtil" class="com.appdynamicspilot.webserviceclient.SoapUtils">
+        <property name="axisUrl">
             <value>${axisUrl}</value>
         </property>
         <property name="axis14Url">
             <value>${axis14Url}</value>
         </property>
-     </bean>
-
-
-    <!-- a pooling based JMS provider -->
-    <bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop">
-        <property name="connectionFactory">
-            <bean class="org.apache.activemq.ActiveMQConnectionFactory">
-                <property name="brokerURL"><value>${jmsBrokerUrl}</value></property>
-            </bean>
-        </property>
-    </bean>
-
-    <!-- Spring JMS Template -->
-    <bean id="proucerJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory"><ref local="jmsFactory"/></property>
-        <property name="defaultDestination">
-            <ref local="defaultDestination"/>
-        </property>
-    </bean>
-
-    <bean id="customerJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory"><ref local="jmsFactory"/></property>
-        <property name="defaultDestination">
-            <ref local="customerDestination"/>
-        </property>
-    </bean>
-
-    <bean id="fulfillmentJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory"><ref local="jmsFactory"/></property>
-        <property name="defaultDestination">
-            <ref local="fulfillmentDestination"/>
-        </property>
     </bean>
 
 
-    <!-- a sample POJO which uses a Spring JmsTemplate -->
-    <bean id="messageProducer" class="com.appdynamicspilot.jms.MessageProducer">
-        <property name="jmsTemplate"><ref bean="proucerJmsTemplate"></ref></property>
-    </bean>
-
-    <!-- a sample POJO which uses a Spring JmsTemplate -->
-    <bean id="customerMessageProducer" class="com.appdynamicspilot.jms.CustomerMessageProducer">
-        <property name="jmsTemplate"><ref bean="customerJmsTemplate"></ref></property>
-    </bean>
 
 
-    <!-- a sample POJO which uses a Spring JmsTemplate -->
-    <bean id="fulfillmentProducer" class="com.appdynamicspilot.jms.FulfillmentProducer">
-        <property name="jmsTemplate"><ref bean="fulfillmentJmsTemplate"></ref></property>
-    </bean>
 
     <tx:annotation-driven proxy-target-class="true"/>
     <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
-	
+
 </beans>
 

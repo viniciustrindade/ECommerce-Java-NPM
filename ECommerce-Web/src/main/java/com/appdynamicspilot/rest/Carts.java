@@ -16,43 +16,30 @@
 
 package com.appdynamicspilot.rest;
 
+import com.appdynamics.apm.appagent.api.AgentDelegate;
+import com.appdynamics.apm.appagent.api.IMetricAndEventReporter;
+import com.appdynamicspilot.model.Cart;
+import com.appdynamicspilot.model.Item;
+import com.appdynamicspilot.model.User;
+import com.appdynamicspilot.service.CartService;
+import com.appdynamicspilot.service.UserService;
+import com.appdynamicspilot.util.SpringContext;
+import org.apache.log4j.Logger;
+
+import javax.naming.InitialContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
-import javax.annotation.Resource;
-import javax.jms.Queue;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import com.appdynamicspilot.service.UserService;
-import org.apache.log4j.Logger;
-
-import com.appdynamicspilot.jms.MessageProducer;
-import com.appdynamicspilot.model.Cart;
-import com.appdynamicspilot.model.Item;
-import com.appdynamicspilot.model.User;
-import com.appdynamicspilot.service.CartService;
-import com.appdynamicspilot.util.SpringContext;
-
-import javax.naming.InitialContext;
-
-import com.appdynamics.apm.appagent.api.*;
 
 @Path("/cart")
 public class Carts {
@@ -60,26 +47,12 @@ public class Carts {
     public static final int TEN_SECONDS = 10;
     public static final int TITLE_TO_CAUSE_SLOWDOWN = 13;
     public static final int ONE_SECOND = 1;
-    @Resource(name = "OrderQueue")
-    private Queue orderQueue;
-
-    private MessageProducer messageProducer;
-
-    public MessageProducer getMessageProducer() {
-        return (MessageProducer) SpringContext.getBean("messageProducer");
-    }
-
-    public void setMessageProducer(MessageProducer messageProducer) {
-        this.messageProducer = messageProducer;
-    }
 
     @Path("{id}")
     @GET
     @Produces(MediaType.APPLICATION_XML)
     public Response saveItemInCart(@Context HttpServletRequest req, @Context HttpServletResponse response, @PathParam("id") Long id) {
-        if (id == TITLE_TO_CAUSE_SLOWDOWN) {
-            causeContention();
-        }
+
         String sessionId = req.getHeader("JSESSIONID");
         HttpSession session = req.getSession();
         Cart cart = (Cart) session.getAttribute("CART");
@@ -99,7 +72,6 @@ public class Carts {
         cart.getCartTotal();
         cart.setUser(user);
         getCartService().saveItemInCart(cart);
-        slowQuery(ONE_SECOND);
         session.setAttribute("CART", cart);
         response.setHeader("cart-size", String.valueOf(getCartService().getCartSize(user.getId())));
         response.setHeader("cart-total", Double.toString(cart.getCartTotal()));
@@ -108,36 +80,7 @@ public class Carts {
 
     }
 
-    private void causeContention() {
-        for (int i=0;i< 10; i++) {
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    slowQuery(TEN_SECONDS);
-                }
-            });
-            t.start();
-        }
-    }
 
-    private void slowQuery(int seconds) {
-        IMetricAndEventReporter reporter = AgentDelegate.getMetricAndEventPublisher();
-        Connection connection = null;
-        CallableStatement stmt = null;
-        reporter.reportSumMetric("ECommerce Demo|Slow Query Calls|Call Count",1);
-        try {
-            connection = getOracleDataSource().getConnection();
-            stmt = connection.prepareCall("{call addToCart(?)}");
-            stmt.setInt(1, seconds);
-            stmt.execute();
-        } catch (SQLException sqle) {
-
-        }   finally {
-            if (stmt != null) try{connection.close();} catch (Exception e){}
-            if (connection != null) try{connection.close();} catch (Exception e){}
-        }
-
-    }
 
     @Path("/all")
     @GET
@@ -207,14 +150,9 @@ public class Carts {
 
             }
             if (orderIdList.size() > 0 && !outOfStock) {
-                messageProducer.sendMessageWithOrderId(orderIds, emailId);
-                //messageProducer.sendTextMessageWithOrderId();
                 return "Order ID(s) for your order(s) : " + orderIds;
 
             } else {
-                if (messageProducer != null) {//TODO where is messageProducer instantiated/injected
-                    messageProducer.sendMessageWithOrderId(orderIds, emailId);
-                }
                 return
                         "Order not created as one or more items in your cart were out of stock";
             }
@@ -263,13 +201,8 @@ public class Carts {
             }
 
             if (orderIdList.size() > 0 && !outOfStock) {
-                getMessageProducer().sendMessageWithOrderId(orderIds, user.getEmail());
-                getMessageProducer().sendTextMessageWithOrderId();
                 return "Total amount is $" + cart.getCartTotal() + " Order ID(s) for your order(s) : " + orderIds;
             } else {
-                if (getMessageProducer() != null) {
-                    getMessageProducer().sendMessageWithOrderId(orderIds, user.getEmail());
-                }
                 return "Order not created as one or more items in your cart were out of stock. Total was $" + cart.getCartTotal();
             }
         } catch (Exception ex) {
@@ -286,12 +219,4 @@ public class Carts {
         return (UserService) SpringContext.getBean("userService");
     }
 
-    private DataSource getOracleDataSource() {
-        try {
-            return (DataSource) new InitialContext().lookup("java:/comp/env/jdbc/OracleECommerceDB");
-        } catch (Exception ex) {
-            log.fatal(ex);
-        }
-        return null;
-    }
 }

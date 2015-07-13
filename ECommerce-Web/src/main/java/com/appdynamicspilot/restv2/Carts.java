@@ -16,46 +16,28 @@
 
 package com.appdynamicspilot.restv2;
 
-import com.appdynamicspilot.jms.MessageProducer;
 import com.appdynamicspilot.model.Cart;
-import com.appdynamicspilot.model.Fault;
 import com.appdynamicspilot.model.Item;
 import com.appdynamicspilot.model.User;
 import com.appdynamicspilot.service.CartService;
-import com.appdynamicspilot.service.FaultService;
 import com.appdynamicspilot.service.UserService;
-import com.appdynamicspilot.util.FaultUtils;
 import com.appdynamicspilot.util.SpringContext;
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import org.apache.log4j.Logger;
 
-import javax.annotation.Resource;
-import javax.jms.Queue;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("/json/cart")
 public class Carts {
     private static final Logger log = Logger.getLogger(Carts.class.getName());
-    // Not used in rest
-    @Resource(name = "OrderQueue")
-    private Queue orderQueue;
-    private MessageProducer messageProducer;
-
-
-    public MessageProducer getMessageProducer() {
-        return (MessageProducer) SpringContext.getBean("messageProducer");
-    }
-
-    public void setMessageProducer(MessageProducer messageProducer) {
-        this.messageProducer = messageProducer;
-    }
-
     /**
      * Gets cartService bean
      *
@@ -72,15 +54,6 @@ public class Carts {
      */
     public UserService getUserService() {
         return (UserService) SpringContext.getBean("userService");
-    }
-
-    /**
-     * Gets FaultService bean
-     *
-     * @return FaultService
-     */
-    public FaultService getFIBugService() {
-        return (FaultService) SpringContext.getBean("faultService");
     }
 
     /**
@@ -109,23 +82,13 @@ public class Carts {
             }
 
             /**
-             *  Reading time range, user name and fault type.
-             *  Applicable only for Fault Injection
+             * Call Rest URL which returns Hello world
              */
-            FaultUtils faultUtils = new FaultUtils();
-            if (!StringUtils.isBlank(username)) {
-                List<Fault> lsFaultFromCache = faultUtils.readCaching(username);
-                if (lsFaultFromCache != null && lsFaultFromCache.size() > 0 && lsFaultFromCache.get(0).getUsername().trim().equalsIgnoreCase(username.trim())) {
-                    log.info("From Caching");
-                    faultUtils.injectFault(lsFaultFromCache, false);
-                } else {
-                    List<Fault> lsFault = getFIBugService().getAllFaultsByUser(username);
-                    if (lsFault != null && lsFault.size() > 0 && lsFault.get(0).getUsername().trim().equalsIgnoreCase(username.trim())) {
-                        log.info("From DB");
-                        faultUtils.injectFault(lsFault, false);
-                    }
-                }
-            }
+            Client client = Client.create();
+            WebResource wb = client.resource(GetConfigFiles());
+            String clientResponse = wb.get(
+                    String.class);
+             log.info(clientResponse + " from order processor rest");
 
             /**
              * Save or Update Item in Cart
@@ -258,13 +221,10 @@ public class Carts {
             orderIds = orderIds.substring(2);
             log.info("orderIds : " + orderIds);
             if (orderIdList.size() > 0 && !outOfStock) {
-                getMessageProducer().sendMessageWithOrderId(orderIds, user.getEmail());
-                getMessageProducer().sendTextMessageWithOrderId();
+                //Removing items from cart, if success
+                getCartService().deleteCartItems(user.getId());
                 return "Total amount is $" + cart.getCartTotal() + " Order ID(s) for your order(s) : " + orderIds;
             } else {
-                if (getMessageProducer() != null) {
-                    getMessageProducer().sendMessageWithOrderId(orderIds, user.getEmail());
-                }
                 return "Order not created as one or more items in your cart were out of stock. Total was $" + cart.getCartTotal();
             }
         } catch (Exception ex) {
@@ -305,14 +265,10 @@ public class Carts {
 
             }
             if (orderIdList.size() > 0 && !outOfStock) {
-                messageProducer.sendMessageWithOrderId(orderIds, emailId);
                 //messageProducer.sendTextMessageWithOrderId();
                 return "Order ID(s) for your order(s) : " + orderIds;
 
             } else {
-                if (messageProducer != null) {//TODO where is messageProducer instantiated/injected
-                    messageProducer.sendMessageWithOrderId(orderIds, emailId);
-                }
                 return
                         "Order not created as one or more items in your cart were out of stock";
             }
@@ -322,5 +278,16 @@ public class Carts {
             log.error(e);
         }
         return "Error occured processing checkout";
+    }
+
+    private String GetConfigFiles(){
+        GetConfigProperties properties = new GetConfigProperties();
+        try {
+            return properties.getOrderUrl();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 }
