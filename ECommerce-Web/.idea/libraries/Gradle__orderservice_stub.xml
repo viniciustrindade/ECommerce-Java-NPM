@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: orderservice_stub">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/libs/orderservice_stub.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

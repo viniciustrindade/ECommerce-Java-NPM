@@ -1,16 +1,16 @@
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.ear
 
+Intellij/Eclipse
 .idea/**
-.gradle/**
-/**.class
-build/**
-
 **/*.iml
 **/*.iws
 **/*.ipr
+**/*.eml
+**/.idea
+*.userlibraries
 
 # Mac
 .DS_Store
