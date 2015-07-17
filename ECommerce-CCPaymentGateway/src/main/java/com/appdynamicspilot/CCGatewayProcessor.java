@@ -27,7 +27,7 @@ public class CCGatewayProcessor {
 	@Path("/cc-pay/{ccNumber}/{userName}/{orderId}/{fail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String processPayment(@PathParam("userName") String username,
-			@PathParam("ccNumber") long ccNumber,@PathParam("orderId") long orderId, @PathParam("fail") boolean returnFailure){
+			@PathParam("ccNumber") long ccNumber,@PathParam("orderId") long orderId, @PathParam("fail") boolean returnFailure) throws Exception {
 		this.ccNumber = ccNumber;
 		this.returnFailure = returnFailure;
 		this.username = username;
@@ -36,12 +36,17 @@ public class CCGatewayProcessor {
 		logger.info("credit card number is:" +this.ccNumber);
 		logger.info("Order : " + this.orderId + " has been processed for the user: " +this.username);
 
-		if(this.returnFailure){
-			
-			return "Sorry we failed to process the order " +returnFailure;
-
+		if (this.returnFailure) {
+			throw new Exception("Sorry, failed to process card");
 		}
 		return "Order : " + this.orderId + " has been processed for the user: " +this.username;
 
+	}
+
+
+	protected void generateException() throws Exception {
+
+		Exception e = new Exception();
+		throw e;
 	}
 }
