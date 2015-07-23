@@ -90,7 +90,7 @@ public class OrderDaoImpl implements OrderDao {
             logger.info(responseFromCCPayment);
 
             if (responseFromCCPayment.equalsIgnoreCase("success")) {
-                Date date = new Date(System.currentTimeMillis());
+               /* Date date = new Date(System.currentTimeMillis());
                 int minutes = date.getMinutes();
                 boolean triggerSlow = false;
                 if ((minutes >= 0) && (minutes <= 20)) {
@@ -109,9 +109,11 @@ public class OrderDaoImpl implements OrderDao {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
+                logger.info("The order request has been created due to successful credit card info.");
                 return storeOrder(orderRequest);
             } else {
+                logger.info("Order failed due to invalid card information");
                 throw new InventoryServerException("Error in creating order for " + item.getId() + "as the entered card was rejected", null);
             }
 

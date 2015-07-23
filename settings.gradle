@@ -1,8 +1,6 @@
 rootProject.name = "ECommerce"
-include "ECommerce-FulfillmentClient"
 include "ECommerce-Web"
 include "ECommerce-WS"
 include "ECommerce-Shared"
 include "ECommerce-OrderProcessor"
 include "ECommerce-PaymentGateway"
-include "ECommerce-Runbooks"
