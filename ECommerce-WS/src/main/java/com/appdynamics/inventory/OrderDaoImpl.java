@@ -90,31 +90,10 @@ public class OrderDaoImpl implements OrderDao {
             logger.info(responseFromCCPayment);
 
             if (responseFromCCPayment.equalsIgnoreCase("success")) {
-               /* Date date = new Date(System.currentTimeMillis());
-                int minutes = date.getMinutes();
-                boolean triggerSlow = false;
-                if ((minutes >= 0) && (minutes <= 20)) {
-                    triggerSlow = true;
-                }
-
-                QueryExecutor qe = new QueryExecutor();
-                if (triggerSlow) {
-                    qe.executeSimplePS(10000);
-                } else {
-                    qe.executeSimplePS(10);
-                }
-                try {
-                    Query q = getEntityManager().createNativeQuery(this.selectQuery);
-                    q.getResultList();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
                 logger.info("The order request has been created due to successful credit card info.");
                 return storeOrder(orderRequest);
             } else {
                 logger.info("Order failed due to invalid card information");
-                throw new InventoryServerException("Error in creating order for " + item.getId() + "as the entered card was rejected", null);
             }
 
         } catch (IOException e) {
