@@ -21,17 +21,41 @@ import org.apache.log4j.Logger;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 
 @Path("/rest")
 public class Order {
-    private static final Logger LOGGER = Logger.getLogger(Order.class);
+    private static final Logger log = Logger.getLogger(Order.class);
 
-
+    private Client client = null;
+    private WebTarget webTarget = null;
     @Path("/test")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String test() {
+        client = ClientBuilder.newClient();
+        WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
+        Response ccResponse = webTarget.request().accept(MediaType.TEXT_PLAIN).get(Response.class);
+
+        String clientResponse = ccResponse.readEntity(String.class);
+        log.info(clientResponse + " from order processor rest");
         return "Hello world";
+    }
+
+    private String GetConfigFiles() {
+        GetConfigProperties properties = new GetConfigProperties();
+        try {
+            return properties.getOrderUrl();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 }
