@@ -10,8 +10,6 @@ dependencies {
     compile 'log4j:log4j:1.2.17';
 
     compile 'javax.servlet:servlet-api:2.5';
-    compile 'javax.jms:jms-api:1.1-rev-1';
-
     compile 'com.sun.mail:javax.mail:1.5.2';
 
     compile 'javax.xml.ws:jaxws-api:2.2.11';

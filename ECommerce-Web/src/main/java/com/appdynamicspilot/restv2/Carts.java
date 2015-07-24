@@ -38,6 +38,7 @@ import java.util.List;
 @Path("/json/cart")
 public class Carts {
     private static final Logger log = Logger.getLogger(Carts.class.getName());
+
     /**
      * Gets cartService bean
      *
@@ -84,11 +85,13 @@ public class Carts {
             /**
              * Call Rest URL which returns Hello world
              */
+
+
             Client client = Client.create();
             WebResource wb = client.resource(GetConfigFiles());
             String clientResponse = wb.get(
                     String.class);
-             log.info(clientResponse + " from order processor rest");
+            log.info(clientResponse + " from order processor rest");
 
             /**
              * Save or Update Item in Cart
@@ -280,7 +283,7 @@ public class Carts {
         return "Error occured processing checkout";
     }
 
-    private String GetConfigFiles(){
+    private String GetConfigFiles() {
         GetConfigProperties properties = new GetConfigProperties();
         try {
             return properties.getOrderUrl();
