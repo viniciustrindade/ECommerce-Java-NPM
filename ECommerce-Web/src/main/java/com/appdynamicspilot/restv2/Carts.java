@@ -23,14 +23,17 @@ import com.appdynamicspilot.service.CartService;
 import com.appdynamicspilot.service.UserService;
 import com.appdynamicspilot.util.SpringContext;
 import com.google.gson.Gson;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,9 @@ import java.util.List;
 @Path("/json/cart")
 public class Carts {
     private static final Logger log = Logger.getLogger(Carts.class.getName());
+
+    private Client client = null;
+    private WebTarget webTarget = null;
 
     /**
      * Gets cartService bean
@@ -85,12 +91,11 @@ public class Carts {
             /**
              * Call Rest URL which returns Hello world
              */
+            client = ClientBuilder.newClient();
+            WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
+            Response ccResponse = webTarget.request().accept(MediaType.TEXT_PLAIN).get(Response.class);
 
-
-            Client client = Client.create();
-            WebResource wb = client.resource(GetConfigFiles());
-            String clientResponse = wb.get(
-                    String.class);
+            String clientResponse = ccResponse.readEntity(String.class);
             log.info(clientResponse + " from order processor rest");
 
             /**
