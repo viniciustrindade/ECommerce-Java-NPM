@@ -17,13 +17,13 @@
 package com.appdynamics.inventory;
 
 import com.appdynamicspilot.exception.InventoryServerException;
+import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import org.apache.log4j.Logger;
-import java.util.Date;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 
 public class OrderDaoImpl implements OrderDao {
@@ -44,9 +44,9 @@ public class OrderDaoImpl implements OrderDao {
     private String selectQuery = null;
 
     public synchronized EntityManager getEntityManager() {
-       if (entityManager ==null) {
-          entityManager = getEntityManagerFactory().createEntityManager();
-       }
+        if (entityManager == null) {
+            entityManager = getEntityManagerFactory().createEntityManager();
+        }
         return entityManager;
     }
 
@@ -54,34 +54,41 @@ public class OrderDaoImpl implements OrderDao {
         this.entityManager = entityManager;
     }
 
-        public Long createOrder(OrderRequest orderRequest) throws InventoryServerException {
-        InventoryItem item = getEntityManager().find(InventoryItem.class,orderRequest.getItemId());
-
+    public Long createOrder(OrderRequest orderRequest) throws InventoryServerException {
+        //InventoryItem item = getEntityManager().find(InventoryItem.class,orderRequest.getItemId());
+        logger.info("createOrder: " + orderRequest.getItemId() + ", " + orderRequest.getQuantity() + ", " + orderRequest.getClass());
         return storeOrder(orderRequest);
     }
 
     private Long storeOrder(OrderRequest orderRequest) {
-        InventoryItem item = entityManager.find(InventoryItem.class,orderRequest.getItemId());
-        Order order = new Order(orderRequest,item);
-
-        order.setQuantity(orderRequest.getQuantity());
-        persistOrder(order);
-        //deleting the order to reduce size of data
-        removeOrder(order);
-        return order.getId();
+        try {
+            InventoryItem item = entityManager.find(InventoryItem.class, orderRequest.getItemId());
+            Order order = new Order(orderRequest, item);
+            order.setQuantity(orderRequest.getQuantity());
+            persistOrder(order);
+            //deleting the order to reduce size of data
+            removeOrder(order);
+            return order.getId();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            logger.error(getStackTrace(ex));
+        }
+        return new Long(0);
     }
 
     private void persistOrder(Order order) {
         EntityTransaction txn = getEntityManager().getTransaction();
         try {
             txn.begin();
+            logger.info("persistOrder: " + order.getId() + ", " + order.getQuantity() + ", " + order.getCreatedOn());
             entityManager.persist(order);
         } catch (Exception ex) {
-             logger.error(ex);
-             txn.rollback();
+            logger.error(ex.getMessage());
+            logger.error(getStackTrace(ex));
+            txn.rollback();
         } finally {
-            if(!txn.getRollbackOnly()) {
-               txn.commit();
+            if (!txn.getRollbackOnly()) {
+                txn.commit();
             }
         }
     }
@@ -90,15 +97,26 @@ public class OrderDaoImpl implements OrderDao {
         EntityTransaction txn = getEntityManager().getTransaction();
         try {
             txn.begin();
+            logger.info("removeOrder: " + order.getId() + ", " + order.getQuantity() + ", " + order.getCreatedOn());
             entityManager.remove(order);
         } catch (Exception ex) {
-            logger.error(ex);
+            logger.error(ex.getMessage());
+            logger.error(getStackTrace(ex));
             txn.rollback();
         } finally {
-            if(!txn.getRollbackOnly()) {
+            if (!txn.getRollbackOnly()) {
                 txn.commit();
             }
         }
+    }
+
+    static String getStackTrace(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw, true);
+        t.printStackTrace(pw);
+        pw.flush();
+        sw.flush();
+        return sw.toString();
     }
 
     /**
