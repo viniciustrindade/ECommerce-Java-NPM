@@ -36,6 +36,7 @@ public class SoapUtils {
 		com.appdynamics.inventory.xsd.OrderRequest orderRequest=new com.appdynamics.inventory.xsd.OrderRequest();
 		OrderServicePortTypeProxy ospp=new OrderServicePortTypeProxy();
 		ospp.setEndpoint(axisUrl);
+
 		try {
             orderRequest.setItemId(itemId);
             orderRequest.setQuantity(new Long(quanity));

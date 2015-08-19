@@ -1,5 +1,6 @@
 package com.appdynamicspilot;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,8 @@ public class CCGatewayProcessor {
 	private static final Logger logger = LoggerFactory
 			.getLogger(CCGatewayProcessor.class);
 
+    private static String RespStr = RandomStringUtils.random(8192);
+
 
 	@GET
 	@Path("/ccpay")
@@ -28,10 +31,10 @@ public class CCGatewayProcessor {
 		int randomNumber = randInteger.nextInt(10);
 
 		if (randomNumber % 2 == 0) {
-			return "success";
+			return "success : " + RespStr;
 		}
 		else
-			return "failure";
+			return "failure: " + RespStr;
 
 	}
 

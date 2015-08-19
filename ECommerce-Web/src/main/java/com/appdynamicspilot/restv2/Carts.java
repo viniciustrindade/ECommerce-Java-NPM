@@ -93,10 +93,11 @@ public class Carts {
              */
             client = ClientBuilder.newClient();
             WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
-            Response ccResponse = webTarget.request().accept(MediaType.TEXT_PLAIN).get(Response.class);
+            Response ccResponse = webTarget.request().header("username", username).accept(MediaType.TEXT_PLAIN).get(Response.class);
 
             String clientResponse = ccResponse.readEntity(String.class);
             log.info(clientResponse + " from order processor rest");
+
 
             /**
              * Save or Update Item in Cart
@@ -107,10 +108,12 @@ public class Carts {
                 cart.setUser(user);
                 cart.addItem(item);
                 getCartService().saveItemInCart(cart);
-            } else {
+            } else if (cart != null && !cart.findItem(item)) {
                 cart.setUser(user);
                 cart.addItem(item);
                 getCartService().updateItemInCart(cart);
+            } else {
+                log.info("item already exists " + username + " " + id);
             }
             response.setCartSize(String.valueOf(cart.getCartSize()));
             response.setCartTotal(cart.getCartTotal());

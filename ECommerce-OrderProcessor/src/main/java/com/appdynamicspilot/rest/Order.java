@@ -18,12 +18,14 @@ package com.appdynamicspilot.rest;
 
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -38,14 +40,15 @@ public class Order {
     @Path("/test")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String test() {
+    public String test(@Context HttpServletRequest req) {
+        String username = req.getHeader("USERNAME");
         client = ClientBuilder.newClient();
         WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
         Response ccResponse = webTarget.request().accept(MediaType.TEXT_PLAIN).get(Response.class);
 
         String clientResponse = ccResponse.readEntity(String.class);
         log.info(clientResponse + " from order processor rest");
-        return "Hello world";
+        return username;
     }
 
     private String GetConfigFiles() {
