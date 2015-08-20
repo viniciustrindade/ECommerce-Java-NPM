@@ -62,13 +62,16 @@ public class OrderDaoImpl implements OrderDao {
 
     private Long storeOrder(OrderRequest orderRequest) {
         try {
-            InventoryItem item = entityManager.find(InventoryItem.class, orderRequest.getItemId());
-            Order order = new Order(orderRequest, item);
-            order.setQuantity(orderRequest.getQuantity());
-            persistOrder(order);
-            //deleting the order to reduce size of data
-            removeOrder(order);
-            return order.getId();
+            InventoryItem item = getEntityManager().find(InventoryItem.class, orderRequest.getItemId());
+            if(item != null) {
+                Order order = new Order(orderRequest, item);
+                order.setQuantity(orderRequest.getQuantity());
+                persistOrder(order);
+                //deleting the order to reduce size of data
+                removeOrder(order);
+                return order.getId();
+            }
+            logger.info("Inventory Item is null");
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             logger.error(getStackTrace(ex));
