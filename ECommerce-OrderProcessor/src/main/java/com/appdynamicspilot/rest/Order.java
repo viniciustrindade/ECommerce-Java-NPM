@@ -23,6 +23,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
+
+import javax.ws.rs.client.Invocation; // Added by HN
+
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
@@ -44,7 +47,11 @@ public class Order {
         String username = req.getHeader("USERNAME");
         client = ClientBuilder.newClient();
         WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
-        Response ccResponse = webTarget.request().accept(MediaType.TEXT_PLAIN).get(Response.class);
+
+        Invocation.Builder iB = webTarget.request();
+        iB.header("Connection","close");
+
+        Response ccResponse = iB.accept(MediaType.TEXT_PLAIN).get(Response.class);
 
         String clientResponse = ccResponse.readEntity(String.class);
         log.info(clientResponse + " from order processor rest");
