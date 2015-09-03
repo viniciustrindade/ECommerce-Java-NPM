@@ -18,6 +18,7 @@ package com.appdynamics.inventory;
 
 import com.appdynamicspilot.exception.InventoryServerException;
 import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -27,9 +28,11 @@ import java.io.StringWriter;
 
 
 public class OrderDaoImpl implements OrderDao {
-    public static final int SLOW_BOOK = 3;
-    private Logger logger = Logger.getLogger(OrderDaoImpl.class);
+    private org.slf4j.Logger logger = LoggerFactory.getLogger(OrderDaoImpl.class);
     private EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
+
+    private String selectQuery = null;
 
     public EntityManagerFactory getEntityManagerFactory() {
         return entityManagerFactory;
@@ -39,95 +42,63 @@ public class OrderDaoImpl implements OrderDao {
         this.entityManagerFactory = entityManagerFactory;
     }
 
-    private EntityManager entityManager;
-
-    private String selectQuery = null;
-
-    public synchronized EntityManager getEntityManager() {
-        if (entityManager == null) {
-            entityManager = getEntityManagerFactory().createEntityManager();
-        }
-        return entityManager;
-    }
-
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     public Long createOrder(OrderRequest orderRequest) throws InventoryServerException {
         //InventoryItem item = getEntityManager().find(InventoryItem.class,orderRequest.getItemId());
-        logger.info("createOrder: " + orderRequest.getItemId() + ", " + orderRequest.getQuantity() + ", " + orderRequest.getClass());
-        return storeOrder(orderRequest);
-    }
-
-    private Long storeOrder(OrderRequest orderRequest) {
         try {
-            InventoryItem item = getEntityManager().find(InventoryItem.class, orderRequest.getItemId());
-            if(item != null) {
-                Order order = new Order(orderRequest, item);
-                order.setQuantity(orderRequest.getQuantity());
-                persistOrder(order);
-                //deleting the order to reduce size of data
-                removeOrder(order);
-                return order.getId();
-            }
-            logger.info("Inventory Item is null");
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(getStackTrace(ex));
+        if (orderRequest != null)
+            return processOrder(orderRequest);
+        else
+            logger.info("OrderRequest is null");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            StringWriter writer = new StringWriter();
+            PrintWriter pw = new PrintWriter(writer);
+            e.printStackTrace(pw);
+            String errorDetail = writer.toString();
+            logger.error(errorDetail);
         }
         return new Long(0);
     }
 
-    private void persistOrder(Order order) {
-        EntityTransaction txn = getEntityManager().getTransaction();
+    private Long processOrder(OrderRequest orderRequest) {
         try {
-            txn.begin();
-            logger.info("persistOrder: " + order.getId() + ", " + order.getQuantity() + ", " + order.getCreatedOn());
-            entityManager.persist(order);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(getStackTrace(ex));
-            txn.rollback();
-        } finally {
-            if (!txn.getRollbackOnly()) {
-                txn.commit();
+            EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+            if (entityManager != null) {
+                InventoryItem item = entityManager.find(InventoryItem.class,
+                        orderRequest.getItemId());
+
+                if (item != null) {
+                    Order order = new Order(orderRequest, item);
+                    if (order != null) {
+                        order.setQuantity(orderRequest.getQuantity());
+
+                        logger.info("order stored is: " + order.getId() + " " + order.getQuantity() + " " + order.getCreatedOn());
+
+                        entityManager.getTransaction().begin();
+                        entityManager.persist(order);
+                        entityManager.getTransaction().commit();
+
+                        Thread.sleep(500);
+
+                        entityManager.getTransaction().begin();
+                        entityManager.remove(order);
+                        entityManager.getTransaction().commit();
+
+                        logger.info("order created is: " + order.getId() + " " + order.getQuantity() + " " + order.getCreatedOn());
+                        return order.getId();
+                    }
+                }
+                entityManager.close();
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            StringWriter writer = new StringWriter();
+            PrintWriter pw = new PrintWriter(writer);
+            e.printStackTrace(pw);
+            String errorDetail = writer.toString();
+            logger.error(errorDetail);
         }
+        return new Long(0);
     }
-
-    private void removeOrder(Order order) {
-        EntityTransaction txn = getEntityManager().getTransaction();
-        try {
-            txn.begin();
-            logger.info("removeOrder: " + order.getId() + ", " + order.getQuantity() + ", " + order.getCreatedOn());
-            entityManager.remove(order);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(getStackTrace(ex));
-            txn.rollback();
-        } finally {
-            if (!txn.getRollbackOnly()) {
-                txn.commit();
-            }
-        }
-    }
-
-    static String getStackTrace(Throwable t) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
-        t.printStackTrace(pw);
-        pw.flush();
-        sw.flush();
-        return sw.toString();
-    }
-
-    /**
-     * @param selectQuery the selectQuery to set
-     */
-    public void setSelectQuery(String selectQuery) {
-        this.selectQuery = selectQuery;
-    }
-
 
 }
