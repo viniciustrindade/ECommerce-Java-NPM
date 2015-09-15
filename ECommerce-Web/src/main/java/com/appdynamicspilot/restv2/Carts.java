@@ -25,6 +25,8 @@ import com.appdynamicspilot.util.SpringContext;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 
+import javax.ws.rs.client.Invocation; // Added by HN
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -93,7 +95,12 @@ public class Carts {
              */
             client = ClientBuilder.newClient();
             WebTarget webTarget = client.target(UriBuilder.fromUri(GetConfigFiles()).build());
-            Response ccResponse = webTarget.request().header("username", username).accept(MediaType.TEXT_PLAIN).get(Response.class);
+
+            Invocation.Builder iB = webTarget.request();
+            iB.header("Connection","close");
+            iB.header("username", username);
+
+            Response ccResponse = iB.accept(MediaType.TEXT_PLAIN).get(Response.class);
 
             String clientResponse = ccResponse.readEntity(String.class);
             log.info(clientResponse + " from order processor rest");
