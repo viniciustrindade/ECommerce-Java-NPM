@@ -32,8 +32,6 @@ public class OrderDaoImpl implements OrderDao {
     private EntityManagerFactory entityManagerFactory;
     private EntityManager entityManager;
 
-    private String selectQuery = null;
-
     public EntityManagerFactory getEntityManagerFactory() {
         return entityManagerFactory;
     }

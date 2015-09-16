@@ -56,9 +56,6 @@
         <property name="entityManagerFactory">
             <ref bean="entityManagerFactory"/>
         </property>
-        <property name="selectQuery">
-            <value>select item.id, now(), sleep(50/1000), now() from item where id = 1</value>
-        </property>
     </bean>
 
 
